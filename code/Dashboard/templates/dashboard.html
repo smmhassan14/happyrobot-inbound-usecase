@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en" class="h-full">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Inbound Calls Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
+</head>
+
+<body class="h-full bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+    <!-- Header -->
+    <header
+        class="sticky top-0 z-10 backdrop-blur bg-white/80 dark:bg-gray-950/70 border-b border-gray-200/60 dark:border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+            <h1 class="text-3xl font-bold">Inbound Calls Dashboard</h1>
+            <div class="flex items-center gap-2">
+                <a href="/" class="text-sm underline opacity-80 hover:opacity-100">Home</a>
+                <button id="themeBtn"
+                    class="rounded-lg border border-gray-300 dark:border-gray-700 px-3 py-1.5 text-sm hover:bg-gray-50 dark:hover:bg-gray-800">Theme</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6 space-y-8">
+        <!-- Stat cards -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div
+                class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm">
+                <div class="text-sm text-gray-500 dark:text-gray-400">Total Carrier Calls</div>
+                <div class="mt-1 text-2xl font-semibold tabular-nums">{{ total_calls or 0 }}</div>
+            </div>
+
+            <div
+                class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm">
+                <div class="text-sm text-gray-500 dark:text-gray-400">Successful Deals</div>
+                <div class="mt-1 text-2xl font-semibold tabular-nums">{{ success_count or 0 }}</div>
+            </div>
+
+            <div
+                class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm">
+                <div class="text-sm text-gray-500 dark:text-gray-400">Unsuccessful Deals</div>
+                <div class="mt-1 text-2xl font-semibold tabular-nums">{{ fail_count or 0 }}</div>
+            </div>
+
+            <div
+                class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm">
+                <div class="text-sm text-gray-500 dark:text-gray-400">Negotiations Ongoing</div>
+                <div class="mt-1 text-2xl font-semibold tabular-nums">{{ ongoing_count or 0 }}</div>
+            </div>
+
+            <div
+                class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4 shadow-sm">
+                <div class="text-sm text-gray-500 dark:text-gray-400">Success Rate</div>
+                <div class="mt-1 text-2xl font-semibold tabular-nums">
+                    {{ (success_rate or 0.0) | round(2) }}%
+                </div>
+                <div class="mt-3 h-2 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                    <div class="h-full bg-emerald-500" style="width: {{ success_rate or 0 }}%"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pickup / Dropoff -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div
+                class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm">
+                <h2 class="text-lg font-semibold mb-3">Load Pickup Locations</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="text-left text-gray-500 dark:text-gray-400">
+                                <th class="py-2 pr-4">Location</th>
+                                <th class="py-2">Success Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if pickups and pickups|length %}
+                            {% for r in pickups %}
+                            <tr class="border-t border-gray-100 dark:border-gray-800">
+                                <td class="py-2 pr-4">{{ r.location }}</td>
+                                <td class="py-2 tabular-nums">{{ r.count }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="2" class="py-3 text-gray-500 dark:text-gray-400">No data</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div
+                class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm">
+                <h2 class="text-lg font-semibold mb-3">Load Dropoff Locations</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="text-left text-gray-500 dark:text-gray-400">
+                                <th class="py-2 pr-4">Location</th>
+                                <th class="py-2">Success Count</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if dropoffs and dropoffs|length %}
+                            {% for r in dropoffs %}
+                            <tr class="border-t border-gray-100 dark:border-gray-800">
+                                <td class="py-2 pr-4">{{ r.location }}</td>
+                                <td class="py-2 tabular-nums">{{ r.count }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="2" class="py-3 text-gray-500 dark:text-gray-400">No data</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Last 5 rates + Negotiation -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div
+                class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm">
+                <h2 class="text-lg font-semibold mb-3">Last 5 Successful Deals Rates</h2>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="text-left text-gray-500 dark:text-gray-400">
+                                <th class="py-2 pr-4">Starting Rate</th>
+                                <th class="py-2">Final Rate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if last5_rates and last5_rates|length %}
+                            {% for r in last5_rates[-5:] %}
+                            <tr class="border-t border-gray-100 dark:border-gray-800">
+                                <td class="py-2 pr-4 tabular-nums">${{ r.start_rate }}</td>
+                                <td class="py-2 tabular-nums font-medium">${{ r.final_rate }}</td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            <tr>
+                                <td colspan="2" class="py-3 text-gray-500 dark:text-gray-400">No data</td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% set pct = (negotiation_under_pct or 0.0) | round(2) %}
+            {# Decide the color + label based on pct #}
+            {% if pct < 0 %} {% set border_color="border-emerald-200 dark:border-emerald-900" %} {% set
+                bg_color="bg-emerald-50 dark:bg-emerald-950/40" %} {% set
+                text_color="text-emerald-700 dark:text-emerald-400" %} {% set bar_color="bg-emerald-500" %} {% set
+                status=pct|string + "% under the listed rate" %} {% set hint="Sold below the starting price" %} {% elif
+                pct <=15 %} {% set border_color="border-gray-300 dark:border-gray-700" %} {% set
+                bg_color="bg-gray-50 dark:bg-gray-800/40" %} {% set text_color="text-gray-700 dark:text-gray-300" %} {%
+                set bar_color="bg-gray-400" %} {% set status=pct|string + "% — within negotiation limit" %} {% set
+                hint="Acceptable negotiation range." %} {% else %} {% set
+                border_color="border-red-200 dark:border-red-900" %} {% set bg_color="bg-red-50 dark:bg-red-950/40" %}
+                {% set text_color="text-red-700 dark:text-red-400" %} {% set bar_color="bg-red-500" %} {% set
+                status=pct|string + "% above negotiation limit" %} {% set
+                hint="Sold more than 15% over the starting price" %} {% endif %} <div
+                class="rounded-2xl border {{ border_color }} {{ bg_color }} p-5 shadow-sm">
+                <h2 class="text-lg font-semibold mb-3">Rate Negotiation</h2>
+                <div
+                    class="inline-flex items-center gap-2 rounded-xl border {{ border_color }} {{ bg_color }} px-3 py-2">
+                    <span class="text-sm">Sold Rate:</span>
+                    <span class="text-sm font-medium {{ text_color }}">{{ status }}</span>
+                </div>
+
+                <div class="mt-4">
+                    <div class="h-2 w-full bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                        <div class="h-full {{ bar_color }}" style="width: {{ pct|abs }}%"></div>
+                    </div>
+                    <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ hint }}</div>
+                </div>
+                </div>
+
+        </section>
+
+        <!-- Unsuccessful Calls -->
+        <section
+            class="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm">
+            <h2 class="text-lg font-semibold mb-3">Unsuccessful Calls</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-sm">
+                    <thead>
+                        <tr class="text-left text-gray-500 dark:text-gray-400">
+                            <th class="py-2 pr-4">Reason</th>
+                            <th class="py-2">Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if unsuccessful_reasons and unsuccessful_reasons|length %}
+                        {% for r in unsuccessful_reasons %}
+                        <tr class="border-t border-gray-100 dark:border-gray-800">
+                            <td class="py-2 pr-4">{{ r.reason }}</td>
+                            <td class="py-2 tabular-nums">{{ r.count }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="2" class="py-3 text-gray-500 dark:text-gray-400">No data</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // Dark mode toggle with localStorage
+        const setDark = (on) => {
+            document.documentElement.classList.toggle('dark', on);
+            localStorage.setItem('theme', on ? 'dark' : 'light');
+        };
+        setDark(localStorage.getItem('theme') === 'dark');
+        document.getElementById('themeBtn').addEventListener('click', () => setDark(!document.documentElement.classList.contains('dark')));
+    </script>
+</body>
+
+</html>

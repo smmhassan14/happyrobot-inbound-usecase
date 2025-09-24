@@ -1,0 +1,7 @@
+[
+  {
+    "classification": "mc_verification_failure",
+    "mc_number": "1587",
+    "reasoning": "The MC number verification failed, and the carrier had a neutral tone throughout the call."
+  }
+]

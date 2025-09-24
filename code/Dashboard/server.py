@@ -11,7 +11,7 @@ app.url_map.strict_slashes = False
 logging.basicConfig(level=logging.INFO)
 
 AI_EXTRACT_DATA = os.getenv("AI_EXTRACT_DATA", "/tmp/data.json")
-API_KEY = os.getenv("API_KEY")
+API_KEY = (os.getenv("API_KEY") or "").strip()
 
 def _ensure_store():
   """Create a valid JSON list file if missing or invalid."""
@@ -56,7 +56,7 @@ _ensure_store()
 @app.route("/", methods=["GET"])
 def home():
   return render_template("homepage.html")
-
+  
 @app.route("/data", methods=["POST"])
 @require_api_key
 def handle_post():
@@ -108,10 +108,26 @@ def dashboard():
       success_count += 1
       pickup = item.get("origin")
       dest = item.get("destination")
-      start_rate = int(item.get("start_rate")) if item.get("start_rate") else 0
-      final_rate = int(item.get("final_rate")) if item.get("final_rate") else 0
-      sold_rate += final_rate / start_rate if start_rate != 0 else 0.0
       
+      if item.get("start_rate"):
+        start_rate = int(item.get("start_rate"))
+      elif not item.get("start_rate") and item.get("final_rate"):
+        start_rate = int(item.get("final_rate"))
+      else:
+        start_rate = 0
+      if item.get("final_rate"):
+        final_rate = int(item.get("final_rate"))
+      elif not item.get("final_rate") and item.get("start_rate"):
+        final_rate = int(item.get("start_rate"))
+      else:
+        final_rate = 0
+      
+      # start_rate = int(item.get("start_rate")) if item.get("start_rate") else 0
+      # final_rate = int(item.get("final_rate")) if item.get("final_rate") else start_rate
+      
+      sold_rate += final_rate / start_rate if start_rate != 0 else 0.0
+      print(start_rate, final_rate, sold_rate)
+
       if pickup:
         pickup_locations[pickup] += 1
       if dest:
@@ -149,7 +165,7 @@ def dashboard():
     negotiation_under_pct=sold_rate,
     unsuccessful_reasons=unsuccessful_reasons_list
   )
-
+    
 if __name__ == "__main__":
   port = int(os.getenv("PORT", "8000"))
   app.run(host="0.0.0.0", port=port, debug=True)
